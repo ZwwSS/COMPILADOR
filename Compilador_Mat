@@ -1,6 +1,6 @@
 
 # gramatica.py
-
+#PARTE LEXICA
 import ply.lex as lex
 import ply.yacc as yacc
 
@@ -14,7 +14,7 @@ reservadas = {
     'o':'OR'
 }
 # Definición de tokens
-tokens = (
+tokens = [
     'PUNTOCOMA',
     'LLAVE_IZQ',
     'LLAVE_DER',
@@ -33,7 +33,7 @@ tokens = (
     'DIVISION',
     'PARENTESIS_IZQ',
     'PARENTESIS_DER',
-)
+] + list(reservadas.values())
 
 # Expresiones regulares para los tokens
 t_SUMA = r'\+'
@@ -42,14 +42,31 @@ t_MULTI = r'\*'
 t_DIVISION = r'/'
 t_PARENTESIS_IZQ = r'\('
 t_PARENTESIS_DER = r'\)'
+t_PUNTOCOMA = r';'
+t_LLAVE_IZQ = r'{'
+t_LLAVE_DER = r'}'
+t_IGUAL = '='
+t_IGUAL_QUE = '=='
+t_MAYOR_QUE = '>'
+t_MENOR_QUE = '<'
+t_MAYORIGUAL = '>='
+t_MENORIGUAL = '<='
+t_DIFERENTE_QUE = '!='
+t_DOSPUNTOS = ':'
+
+
+
 
 def t_NUMERO(t):
     r'\d+'
     t.value = int(t.value)
     return t
 
-# Ignorar espacios y saltos de línea
-t_ignore = ' \n'
+# Detectar e Ignorar espacios y saltos de línea
+t_ignore = ' \t\n'
+def t_nuevalinea (t):
+    r'\n+'
+    t.lexer.lineno == len(t.value)
 
 # Manejo de errores
 def t_error(t):
