@@ -4,8 +4,28 @@
 import ply.lex as lex
 import ply.yacc as yacc
 
+#Definición de Palabras reservadas
+reservadas = {
+    'si' : 'IF',
+    'mientras': 'WHILE',
+    'imprimir' : 'PRINT',
+    'y': 'AND',
+    'no':'NOT',
+    'o':'OR'
+}
 # Definición de tokens
 tokens = (
+    'PUNTOCOMA',
+    'LLAVE_IZQ',
+    'LLAVE_DER',
+    'IGUAL',
+    'IGUAL_QUE',
+    'MAYOR_QUE',
+    'MENOR_QUE',
+    'MAYORIGUAL',
+    'MENORIGUAL',
+    'DIFERENTE_QUE',
+    'DOSPUNTOS',
     'NUMERO',
     'SUMA',
     'RESTA',
