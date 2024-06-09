@@ -1,9 +1,7 @@
-
-# gramatica.py
-#PARTE LEXICA
 import ply.lex as lex
 import ply.yacc as yacc
 
+#PARTE LEXICA
 #Definición de Palabras reservadas
 reservadas = {
     'si' : 'IF',
@@ -64,9 +62,9 @@ def t_NUMERO(t):
 
 # Detectar e Ignorar espacios y saltos de línea
 t_ignore = ' \t\n'
-def t_nuevalinea (t):
-    r'\n+'
-    t.lexer.lineno == len(t.value)
+#def t_nuevalinea (t):
+#    r'\n+'
+#    t.lexer.lineno == len(t.value)
 
 # Manejo de errores
 def t_error(t):
@@ -79,8 +77,8 @@ lexer = lex.lex()
 # Reglas de la gramática
 def p_expresion(p):
     '''expresion : expresion SUMA termino
-                  | expresion RESTA termino
-                  | termino'''
+                 | expresion RESTA termino
+                 | termino'''
     if len(p) == 2:
         p[0] = p[1]
     elif len(p) == 4:
@@ -91,8 +89,8 @@ def p_expresion(p):
 
 def p_termino(p):
     '''termino : termino MULTI factor
-            | termino DIVISION factor
-            | factor'''
+               | termino DIVISION factor
+               | factor'''
     if len(p) == 2:
         p[0] = p[1]
     elif len(p) == 4:
@@ -109,11 +107,17 @@ def p_factor(p):
     else:
         p[0] = p[2]
 
+
+# Manejo de errores de sintaxis
+def p_error(p):
+    print("Error de sintaxis en '%s'" % p.value if p else "Error de sintaxis")
+
 # Construcción del analizador sintáctico
 parser = yacc.yacc()
 
+
 # Ejemplo de uso
-if _name_ == '_main_':
+if __name__ == '_main_':
     data = input("Ingresa una expresión matemática: ")
     result = parser.parse(data)
     print(f"Resultado: {result}")
