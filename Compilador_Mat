@@ -52,7 +52,11 @@ t_MENORIGUAL = '<='
 t_DIFERENTE_QUE = '!='
 t_DOSPUNTOS = ':'
 
-
+# Detectar e Ignorar espacios y saltos de línea
+t_ignore = ' \t\n'
+#def t_nuevalinea (t):
+#    r'\n+'
+#    t.lexer.lineno == len(t.value)
 
 
 def t_NUMERO(t):
@@ -60,11 +64,16 @@ def t_NUMERO(t):
     t.value = int(t.value)
     return t
 
-# Detectar e Ignorar espacios y saltos de línea
-t_ignore = ' \t\n'
-#def t_nuevalinea (t):
-#    r'\n+'
-#    t.lexer.lineno == len(t.value)
+def t_COMENTARIO(t):
+    r'\#.*'
+    pass
+
+#deteccion del identificador para retornarlo
+def t_ID(t):
+    r'[a-zA-Z][a-zA0-9]*'
+    #transforma el token en minusculas
+    t.type = reservadas.get(t.value.lower(),'ID')
+
 
 # Manejo de errores
 def t_error(t):
