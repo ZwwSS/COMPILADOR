@@ -4,12 +4,12 @@ import ply.yacc as yacc
 #PARTE LEXICA
 #Definición de Palabras reservadas
 reservadas = {
-    'si' : 'IF',
-    'mientras': 'WHILE',
-    'imprimir' : 'PRINT',
-    'y': 'AND',
-    'no':'NOT',
-    'o':'OR'
+    'si',
+    'mientras',
+    'imprimir' ,
+    'y',
+    'no',
+    'o'
 }
 # Definición de tokens
 tokens = [
@@ -73,8 +73,11 @@ def t_ID(t):
     r'[a-zA-Z][a-zA0-9]*'
     #transforma el token en minusculas
     t.type = reservadas.get(t.value.lower(),'ID')
+    return t
 
-
+#Deteccion de enteros
+def t_ENTERO(t):
+    r'\d*'
 # Manejo de errores
 def t_error(t):
     print(f"Carácter inesperado: '{t.value[0]}'")
