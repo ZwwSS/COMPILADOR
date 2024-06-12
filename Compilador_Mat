@@ -1,11 +1,29 @@
-
-# gramatica.py
-
 import ply.lex as lex
 import ply.yacc as yacc
 
+#PARTE LEXICA
+#Definición de Palabras reservadas
+reservadas = {
+    'si',
+    'mientras',
+    'imprimir' ,
+    'y',
+    'no',
+    'o'
+}
 # Definición de tokens
-tokens = (
+tokens = [
+    'PUNTOCOMA',
+    'LLAVE_IZQ',
+    'LLAVE_DER',
+    'IGUAL',
+    'IGUAL_QUE',
+    'MAYOR_QUE',
+    'MENOR_QUE',
+    'MAYORIGUAL',
+    'MENORIGUAL',
+    'DIFERENTE_QUE',
+    'DOSPUNTOS',
     'NUMERO',
     'SUMA',
     'RESTA',
@@ -13,7 +31,7 @@ tokens = (
     'DIVISION',
     'PARENTESIS_IZQ',
     'PARENTESIS_DER',
-)
+] + list(reservadas.values())
 
 # Expresiones regulares para los tokens
 t_SUMA = r'\+'
@@ -22,15 +40,44 @@ t_MULTI = r'\*'
 t_DIVISION = r'/'
 t_PARENTESIS_IZQ = r'\('
 t_PARENTESIS_DER = r'\)'
+t_PUNTOCOMA = r';'
+t_LLAVE_IZQ = r'{'
+t_LLAVE_DER = r'}'
+t_IGUAL = '='
+t_IGUAL_QUE = '=='
+t_MAYOR_QUE = '>'
+t_MENOR_QUE = '<'
+t_MAYORIGUAL = '>='
+t_MENORIGUAL = '<='
+t_DIFERENTE_QUE = '!='
+t_DOSPUNTOS = ':'
+
+# Detectar e Ignorar espacios y saltos de línea
+t_ignore = ' \t\n'
+#def t_nuevalinea (t):
+#    r'\n+'
+#    t.lexer.lineno == len(t.value)
+
 
 def t_NUMERO(t):
     r'\d+'
     t.value = int(t.value)
     return t
 
-# Ignorar espacios y saltos de línea
-t_ignore = ' \n'
+def t_COMENTARIO(t):
+    r'\#.*'
+    pass
 
+#deteccion del identificador para retornarlo
+def t_ID(t):
+    r'[a-zA-Z][a-zA0-9]*'
+    #transforma el token en minusculas
+    t.type = reservadas.get(t.value.lower(),'ID')
+    return t
+
+#Deteccion de enteros
+def t_ENTERO(t):
+    r'\d*'
 # Manejo de errores
 def t_error(t):
     print(f"Carácter inesperado: '{t.value[0]}'")
@@ -42,8 +89,8 @@ lexer = lex.lex()
 # Reglas de la gramática
 def p_expresion(p):
     '''expresion : expresion SUMA termino
-                  | expresion RESTA termino
-                  | termino'''
+                 | expresion RESTA termino
+                 | termino'''
     if len(p) == 2:
         p[0] = p[1]
     elif len(p) == 4:
@@ -54,8 +101,8 @@ def p_expresion(p):
 
 def p_termino(p):
     '''termino : termino MULTI factor
-            | termino DIVISION factor
-            | factor'''
+               | termino DIVISION factor
+               | factor'''
     if len(p) == 2:
         p[0] = p[1]
     elif len(p) == 4:
@@ -72,11 +119,17 @@ def p_factor(p):
     else:
         p[0] = p[2]
 
+
+# Manejo de errores de sintaxis
+def p_error(p):
+    print("Error de sintaxis en '%s'" % p.value if p else "Error de sintaxis")
+
 # Construcción del analizador sintáctico
 parser = yacc.yacc()
 
+
 # Ejemplo de uso
-if _name_ == '_main_':
+if __name__ == '_main_':
     data = input("Ingresa una expresión matemática: ")
     result = parser.parse(data)
     print(f"Resultado: {result}")
