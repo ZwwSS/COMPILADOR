@@ -4,53 +4,53 @@ import ply.yacc as yacc
 #PARTE LEXICA
 #Definición de Palabras reservadas
 reservadas = {
-    'si',
-    'mientras',
-    'imprimir' ,
-    'y',
-    'no',
-    'o'
+    'ari', #si
+    'chaykama', #mientras
+    'imprimiy' , #imprimir
+    'chaymanta', #y
+    'manam', #no
+    'utaq' #o 
 }
 # Definición de tokens
 tokens = [
-    'PUNTOCOMA',
-    'LLAVE_IZQ',
-    'LLAVE_DER',
-    'IGUAL',
-    'IGUAL_QUE',
-    'MAYOR_QUE',
-    'MENOR_QUE',
-    'MAYORIGUAL',
-    'MENORIGUAL',
-    'DIFERENTE_QUE',
-    'DOSPUNTOS',
-    'NUMERO',
-    'SUMA',
-    'RESTA',
-    'MULTI',
-    'DIVISION',
-    'PARENTESIS_IZQ',
-    'PARENTESIS_DER',
+    'SEMICOLON', #punto y coma
+    'LLUQI_LLAVE', #Llave izquierda
+    'PAÑA_LLAVE', #llave derecha
+    'CHAYKAQLLA', #igual
+    'CHAYKAQLLAQ', #igual que 
+    'YUYAQ', #mayor que
+    'PISI', #menor que 
+    'YUYAQCHAY', #mayor o igual  
+    'YUYAQPISI', #menor o igual
+    'HUK_NIRAQ', #diferente que 
+    'ISKAY_PUNTO', #dos puntos
+    'YUPAY', #numero
+    'YAPAY', #suma
+    'QICHUY', #resta
+    'MIRACHIY', #multiplicacion 
+    'RAKINAKUY', #division
+    'LLUQI_PAREN', #parentesis d
+    'PAÑA_PAREN', #parentesis i
 ] + list(reservadas.values())
 
 # Expresiones regulares para los tokens
-t_SUMA = r'\+'
-t_RESTA = r'-'
-t_MULTI = r'\*'
-t_DIVISION = r'/'
-t_PARENTESIS_IZQ = r'\('
-t_PARENTESIS_DER = r'\)'
-t_PUNTOCOMA = r';'
-t_LLAVE_IZQ = r'{'
-t_LLAVE_DER = r'}'
-t_IGUAL = '='
-t_IGUAL_QUE = '=='
-t_MAYOR_QUE = '>'
-t_MENOR_QUE = '<'
-t_MAYORIGUAL = '>='
-t_MENORIGUAL = '<='
-t_DIFERENTE_QUE = '!='
-t_DOSPUNTOS = ':'
+t_YAPAY = r'\+'
+t_QICHUY = r'-'
+t_MIRACHIY = r'\*'
+t_RAKINAKUY = r'/'
+t_PAÑA_PAREN = r'\('
+t_LLUQI_PAREN = r'\)'
+t_SEMICOLON = r';'
+t_LLUQI_LLAVE = r'{'
+t_PAÑA_LLAVE = r'}'
+t_CHAYKAQLLA = '='
+t_CHAYKAQLLAQ = '=='
+t_YUYAQ = '>'
+t_PISI = '<'
+t_YUYAQCHAYL = '>='
+t_YUYAQPISI = '<='
+t_HUK_NIRAQ = '!='
+t_ISKAY_PUNTO = ':'
 
 # Detectar e Ignorar espacios y saltos de línea
 t_ignore = ' \t\n'
@@ -133,3 +133,5 @@ if __name__ == '_main_':
     data = input("Ingresa una expresión matemática: ")
     result = parser.parse(data)
     print(f"Resultado: {result}")
+
+
