@@ -1,137 +1,79 @@
-import ply.lex as lex
-import ply.yacc as yacc
+import os
+import codecs
+from lexico import tokens, analizador
+from sintactico import prueba, parser
+from tkinter import *
+from tkinter import filedialog as FileDialog
+from tkinter import messagebox
 
-#PARTE LEXICA
-#Definición de Palabras reservadas
-reservadas = {
-    'ari', #si
-    'chaykama', #mientras
-    'imprimiy' , #imprimir
-    'chaymanta', #y
-    'manam', #no
-    'utaq' #o 
-}
-# Definición de tokens
-tokens = [
-    'SEMICOLON', #punto y coma
-    'LLUQI_LLAVE', #Llave izquierda
-    'PAÑA_LLAVE', #llave derecha
-    'CHAYKAQLLA', #igual
-    'CHAYKAQLLAQ', #igual que 
-    'YUYAQ', #mayor que
-    'PISI', #menor que 
-    'YUYAQCHAY', #mayor o igual  
-    'YUYAQPISI', #menor o igual
-    'HUK_NIRAQ', #diferente que 
-    'ISKAY_PUNTO', #dos puntos
-    'YUPAY', #numero
-    'YAPAY', #suma
-    'QICHUY', #resta
-    'MIRACHIY', #multiplicacion 
-    'RAKINAKUY', #division
-    'LLUQI_PAREN', #parentesis d
-    'PAÑA_PAREN', #parentesis i
-] + list(reservadas.values())
+# Ventana que muestra los resultados
+def Ventana2(data, title):
+    vt2 = Tk()
+    vt2.title(title)
+    vt2.geometry('400x400')
+    canvas = Canvas(vt2)
+    scroll_y = Scrollbar(vt2, orient="vertical", command=canvas.yview)
+    frame = Frame(canvas)
+    i = 0
+    for item in data:
+        e = Label(frame, text=item)
+        e.grid(row=i, column=2)
+        i += 1
+    canvas.create_window(0, 0, anchor='nw', window=frame)
+    canvas.update_idletasks()
+    canvas.configure(scrollregion=canvas.bbox('all'), yscrollcommand=scroll_y.set)
+    canvas.pack(fill='both', expand=True, side='left')
+    scroll_y.pack(fill='y', side='right')
+    vt2.mainloop()
 
-# Expresiones regulares para los tokens
-t_YAPAY = r'\+'
-t_QICHUY = r'-'
-t_MIRACHIY = r'\*'
-t_RAKINAKUY = r'/'
-t_PAÑA_PAREN = r'\('
-t_LLUQI_PAREN = r'\)'
-t_SEMICOLON = r';'
-t_LLUQI_LLAVE = r'{'
-t_PAÑA_LLAVE = r'}'
-t_CHAYKAQLLA = '='
-t_CHAYKAQLLAQ = '=='
-t_YUYAQ = '>'
-t_PISI = '<'
-t_YUYAQCHAYL = '>='
-t_YUYAQPISI = '<='
-t_HUK_NIRAQ = '!='
-t_ISKAY_PUNTO = ':'
+# Función para abrir el archivo
+def abrir_archivo():
+    ruta = FileDialog.askopenfilename(
+        initialdir='.', 
+        filetypes=(("Ficheros de texto", "*.txt"),),
+        title="Abrir un archivo de texto"
+    )
+    if ruta:
+        try:
+            with codecs.open(ruta, 'r', 'utf-8') as f:
+                contenido = f.read()
+                txt_editor.delete(1.0, END)
+                txt_editor.insert(INSERT, contenido)
+        except Exception as e:
+            messagebox.showerror("Error", f"No se puede abrir el archivo: {e}")
 
-# Detectar e Ignorar espacios y saltos de línea
-t_ignore = ' \t\n'
-#def t_nuevalinea (t):
-#    r'\n+'
-#    t.lexer.lineno == len(t.value)
+# Función para analizar el archivo
+def analizar():
+    contenido = txt_editor.get(1.0, END)
+    try:
+        resultado_lexico = analizador(contenido)
+        resultado_sintactico = prueba(contenido)
+        Ventana2(resultado_lexico, "Resultado Léxico")
+        Ventana2(resultado_sintactico, "Resultado Sintáctico")
+    except Exception as e:
+        messagebox.showerror("Error", f"No se puede analizar el archivo: {e}")
 
+# Ventana principal
+root = Tk()
+root.title("Analizador Léxico y Sintáctico")
+root.geometry('600x400')
 
-def t_NUMERO(t):
-    r'\d+'
-    t.value = int(t.value)
-    return t
+# Crear menú
+menubar = Menu(root)
+root.config(menu=menubar)
+filemenu = Menu(menubar, tearoff=0)
+filemenu.add_command(label="Abrir", command=abrir_archivo)
+filemenu.add_separator()
+filemenu.add_command(label="Salir", command=root.quit)
+menubar.add_cascade(label="Archivo", menu=filemenu)
 
-def t_COMENTARIO(t):
-    r'\#.*'
-    pass
+# Crear editor de texto
+txt_editor = Text(root, wrap='word')
+txt_editor.pack(expand=YES, fill=BOTH)
 
-#deteccion del identificador para retornarlo
-def t_ID(t):
-    r'[a-zA-Z][a-zA0-9]*'
-    #transforma el token en minusculas
-    t.type = reservadas.get(t.value.lower(),'ID')
-    return t
+# Crear botón para analizar
+btn_analizar = Button(root, text="Analizar", command=analizar)
+btn_analizar.pack(side=BOTTOM)
 
-#Deteccion de enteros
-def t_ENTERO(t):
-    r'\d*'
-# Manejo de errores
-def t_error(t):
-    print(f"Carácter inesperado: '{t.value[0]}'")
-    t.lexer.skip(1)
-
-# Construcción del analizador léxico
-lexer = lex.lex()
-
-# Reglas de la gramática
-def p_expresion(p):
-    '''expresion : expresion SUMA termino
-                 | expresion RESTA termino
-                 | termino'''
-    if len(p) == 2:
-        p[0] = p[1]
-    elif len(p) == 4:
-        if p[2] == '+':
-            p[0] = p[1] + p[3]
-        elif p[2] == '-':
-            p[0] = p[1] - p[3]
-
-def p_termino(p):
-    '''termino : termino MULTI factor
-               | termino DIVISION factor
-               | factor'''
-    if len(p) == 2:
-        p[0] = p[1]
-    elif len(p) == 4:
-        if p[2] == '*':
-            p[0] = p[1] * p[3]
-        elif p[2] == '/':
-            p[0] = p[1] / p[3]
-
-def p_factor(p):
-    '''factor : NUMERO
-              | PARENTESIS_IZQ expresion PARENTESIS_DER'''
-    if len(p) == 2:
-        p[0] = p[1]
-    else:
-        p[0] = p[2]
-
-
-# Manejo de errores de sintaxis
-def p_error(p):
-    print("Error de sintaxis en '%s'" % p.value if p else "Error de sintaxis")
-
-# Construcción del analizador sintáctico
-parser = yacc.yacc()
-
-
-# Ejemplo de uso
-if __name__ == '_main_':
-    data = input("Ingresa una expresión matemática: ")
-    result = parser.parse(data)
-    print(f"Resultado: {result}")
-
-
+# Iniciar la aplicación
+root.mainloop()
