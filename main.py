@@ -26,54 +26,117 @@ def Ventana2(data, title):
     scroll_y.pack(fill='y', side='right')
     vt2.mainloop()
 
-# Función para abrir el archivo
-def abrir_archivo():
-    ruta = FileDialog.askopenfilename(
-        initialdir='.', 
-        filetypes=(("Ficheros de texto", "*.txt"),),
-        title="Abrir un archivo de texto"
-    )
-    if ruta:
-        try:
-            with codecs.open(ruta, 'r', 'utf-8') as f:
-                contenido = f.read()
-                txt_editor.delete(1.0, END)
-                txt_editor.insert(INSERT, contenido)
-        except Exception as e:
-            messagebox.showerror("Error", f"No se puede abrir el archivo: {e}")
+def Ventana():
+    def lexico():
+        # Analizador léxico
+        cadena = texto.get(1.0, 'end-1c')
+        if len(cadena) > 0:
+            lexico = analizador
+            lexico.input(cadena)
+            tok = lexico.token()
+            a_tok = []
+            while True:
+                tok = lexico.token()
+                if not tok: break
+                a_tok.append(tok)
+            Ventana2(a_tok, "Analizador Léxico")
+        else:
+            messagebox.showwarning(message="Debes escribir código !!", title="Error")
 
-# Función para analizar el archivo
-def analizar():
-    contenido = txt_editor.get(1.0, END)
-    try:
-        resultado_lexico = analizador(contenido)
-        resultado_sintactico = prueba(contenido)
-        Ventana2(resultado_lexico, "Resultado Léxico")
-        Ventana2(resultado_sintactico, "Resultado Sintáctico")
-    except Exception as e:
-        messagebox.showerror("Error", f"No se puede analizar el archivo: {e}")
+    def sintactico():
+        # Analizador sintáctico
+        cadena = texto.get(1.0, 'end-1c')
+        if len(cadena) > 0:
+            cad = []
+            for i in prueba(cadena):
+                if i != "[None]" and "Error sintactico" not in i:
+                    cad.append(i)
+            Ventana2(cad, "Analizador Sintáctico")
+        else:
+            messagebox.showwarning(message="Debes escribir código !!", title="Error")
 
-# Ventana principal
-root = Tk()
-root.title("Analizador Léxico y Sintáctico")
-root.geometry('600x400')
+    def nuevo():
+        mensaje.set('Nuevo fichero')
+        texto.delete(1.0, END)
 
-# Crear menú
-menubar = Menu(root)
-root.config(menu=menubar)
-filemenu = Menu(menubar, tearoff=0)
-filemenu.add_command(label="Abrir", command=abrir_archivo)
-filemenu.add_separator()
-filemenu.add_command(label="Salir", command=root.quit)
-menubar.add_cascade(label="Archivo", menu=filemenu)
+    def abrir():
+        global ruta
+        mensaje.set('Abrir fichero')
+        ruta = FileDialog.askopenfilename(
+            initialdir='',
+            filetypes=(("Ficheros de texto", "*.txt"),),
+            title="Abrir un fichero."
+        )
+        if ruta:
+            with open(ruta, 'r') as fichero:
+                contenido = fichero.read()
+                texto.delete(1.0, END)
+                texto.insert(INSERT, contenido)
+                vt.title(os.path.basename(ruta) + " - Mi editor")
 
-# Crear editor de texto
-txt_editor = Text(root, wrap='word')
-txt_editor.pack(expand=YES, fill=BOTH)
+    def guardar():
+        global ruta
+        if ruta:
+            contenido = texto.get(1.0, 'end-1c')
+            with open(ruta, 'w') as fichero:
+                fichero.write(contenido)
+            mensaje.set('Fichero guardado correctamente')
+        else:
+            guardar_como()
 
-# Crear botón para analizar
-btn_analizar = Button(root, text="Analizar", command=analizar)
-btn_analizar.pack(side=BOTTOM)
+    def guardar_como():
+        global ruta
+        mensaje.set("Guardar fichero como")
+        fichero = FileDialog.asksaveasfile(
+            title="Guardar fichero", mode="w", defaultextension=".txt",
+            filetypes=(("Ficheros de texto", "*.txt"),)
+        )
+        if fichero:
+            ruta = fichero.name
+            contenido = texto.get(1.0, 'end-1c')
+            with open(ruta, 'w') as f:
+                f.write(contenido)
+            mensaje.set("Fichero guardado correctamente")
+        else:
+            mensaje.set("Guardado cancelado")
+            ruta = ""
 
-# Iniciar la aplicación
-root.mainloop()
+    ruta = ''
+
+    # Main
+    vt = Tk()
+    vt.title("Mi editor")
+    vt.geometry('800x600')
+
+    # Menú superior
+    menubar = Menu(vt)
+    filemenu = Menu(menubar, tearoff=0)
+    filemenu.add_command(label="Nuevo", command=nuevo)
+    filemenu.add_command(label="Abrir", command=abrir)
+    filemenu.add_command(label="Guardar", command=guardar)
+    filemenu.add_command(label="Guardar como", command=guardar_como)
+    filemenu.add_separator()
+    filemenu.add_command(label="Salir", command=vt.quit)
+    menubar.add_cascade(label="Archivo", menu=filemenu)
+
+    ejecutar_menu = Menu(menubar, tearoff=0)
+    ejecutar_menu.add_command(label="Ejecutar Analizador Léxico", command=lexico)
+    ejecutar_menu.add_command(label="Ejecutar Analizador Sintáctico", command=sintactico)
+    menubar.add_cascade(label="Ejecutar", menu=ejecutar_menu)
+
+    vt.config(menu=menubar)
+
+    # Caja de texto central
+    texto = Text(vt, wrap='word')
+    texto.pack(fill='both', expand=True)
+
+    # Barra de estado
+    mensaje = StringVar()
+    mensaje.set('Bienvenido a tu editor')
+    barra_estado = Label(vt, textvariable=mensaje, bd=1, relief=SUNKEN, anchor=W)
+    barra_estado.pack(side=BOTTOM, fill=X)
+
+    vt.mainloop()
+
+if __name__ == "__main__":
+    Ventana()
